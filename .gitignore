@@ -1,0 +1,41 @@
+# Virtual Environment
+.venv/
+venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Environment Variables
+.env
+
+# Model Files
+*.pth
+*.pt
+*.ckpt
+
+# Logs
+*.log
+
+# Dataset
+data/raw/
+data/processed/
+
+# BraTS Dataset
+BraTS*/
+ASNR-MICCAI-BraTS2023*/
+
+# Outputs
+outputs/
+predictions/
+results/
+
+# OS Files
+.DS_Store
+Thumbs.db
