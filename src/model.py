@@ -66,8 +66,52 @@ class Up(nn.Module):
         return x
     
 
+class UNet(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+        #Encoder
+        self.down1 = Down(1,64)
+        self.down2 = Down(64,128)
+        self.down3 = Down(128,256)
+        self.down4 = Down(256,512)
+
+        #Bottleneck
+        self.bottleneck = Bottleneck(512,1024)
+
+        #Decoder
+        self.up1 = Up(1024,512)
+        self.up2 = Up(512,256)
+        self.up3 = Up(256,128)
+        self.up4 = Up(128,64)
+
+        #Final Output layer
+        self.final_conv = nn.Conv2d(64 , 1, kernel_size=1)
+
+    def forward(self, x):
+            skip1, x = self.down1(x)
+            skip2, x = self.down2(x)
+            skip3, x = self.down3(x)
+            skip4, x = self.down4(x)
+        
+            x = self.bottleneck(x)
+        
+            x = self.up1(x, skip4)
+            x = self.up2(x, skip3)
+            x = self.up3(x, skip2)
+            x = self.up4(x, skip1)
+        
+            x = self.final_conv(x)
+        
+            return x
+
+ 
+    
+
 def main():
     pass
+
     
 
 if __name__ == "__main__":
