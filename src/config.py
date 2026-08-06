@@ -4,4 +4,4 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 #Dataset path
-DATASET_DIR = PROJECT_ROOT / "Practice 50 Data"
+DATASET_DIR = PROJECT_ROOT / "Brain Tumor Data"
