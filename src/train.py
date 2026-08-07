@@ -159,13 +159,13 @@ def main():
 
             torch.save(model.state_dict(), "best_model.pth")
 
-            print("✅ Best model saved!")
+            print("Best model saved!")
 
         else:
 
             counter += 1
             print(
-                f" ⚠️ No improvement for "
+                f"  No improvement for "
                 f"{counter} / {patience} epochs."
             )
 
@@ -178,11 +178,11 @@ def main():
 
         if counter >= patience:
 
-            print("\n 🛑  Earlt Stopping Triggered!")
+            print("\n   Earlt Stopping Triggered!")
             break  
 
     print("\n===================================")
-    print("     Training Completed ✅")
+    print("     Training Completed ")
     print("===================================")
 
     # Save training history
