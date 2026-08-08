@@ -6,6 +6,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from model import UNet
 from dataloader import create_dataloader
+from loss import BCEDiceLoss
 
 
 def train_one_epoch(model, dataloader, loss_fn, optimizer, device):
@@ -79,7 +80,7 @@ def validate_one_epoch(model, dataloader, loss_fn, device):
 def main():
 
     # Device
-    device = torch.device("cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # DataLoader
     print("Creating DataLoader...")
@@ -91,7 +92,7 @@ def main():
 
     # Loss Function
     print("Creating Loss Function...")
-    loss_fn = nn.BCEWithLogitsLoss()
+    loss_fn = nn.BCEDiceLoss()
 
     # Optimizer
     print("Creating Optimizer...")
