@@ -31,6 +31,9 @@ data/processed/
 BraTS*/
 ASNR-MICCAI-BraTS2023*/
 
+# Local dataset ZIP
+200 patient zip.zip
+
 # Outputs
 outputs/
 predictions/
