@@ -1,8 +1,10 @@
 from torch.utils.data import DataLoader
 from dataset import BrainTumorDataset
 
+
 from sklearn.model_selection import train_test_split
 from load_data import get_patient_folders
+from config import BATCH_SIZE, NUM_WORKERS
 
 
 
@@ -10,6 +12,8 @@ def create_dataloader():
 
     patient_folders = get_patient_folders()
     print("Total Patients:", len(patient_folders))
+
+    print("Patients used:", len(patient_folders))
 
 
     train_patients, val_patient = train_test_split(
@@ -25,16 +29,16 @@ def create_dataloader():
 
     train_loader = DataLoader(
         train_dataset,
-        batch_size=8,
+        batch_size=BATCH_SIZE,
         shuffle=True,
-        num_workers=2
+        num_workers=NUM_WORKERS
     )
 
     val_loader = DataLoader(
         val_dataset,
-        batch_size=8,
+        batch_size=BATCH_SIZE,
         shuffle=False,
-        num_workers=2
+        num_workers=NUM_WORKERS
 
     )
 

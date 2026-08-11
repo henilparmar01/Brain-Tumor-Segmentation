@@ -45,6 +45,8 @@ def preprocess_patient(patient_data):
 
     mask = patient_data["mask"]
 
+    mask = (mask > 0).astype(np.float32)
+
     return multi_channel_image , mask    
 
 

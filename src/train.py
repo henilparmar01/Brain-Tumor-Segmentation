@@ -3,13 +3,15 @@ import torch.nn as nn
 from torch.optim import Adam
 from tqdm import tqdm
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.amp import autocast, GradScaler
 
 from model import UNet
 from dataloader import create_dataloader
-from loss import BCEDiceLoss
+from loss import TverskyFocalLoss
+from config import LEARNING_RATE, EPOCHS
 
 
-def train_one_epoch(model, dataloader, loss_fn, optimizer, device):
+def train_one_epoch(model, dataloader, loss_fn, optimizer, device, scaler):
 
     model.train()
 
@@ -26,17 +28,25 @@ def train_one_epoch(model, dataloader, loss_fn, optimizer, device):
         images = images.to(device)
         masks = masks.to(device)
 
-        optimizer.zero_grad()
+        optimizer.zero_grad(set_to_none=True)
 
-        outputs = model(images)
+        with autocast(
+            device_type=device.type,
+            enabled=(device.type == "cuda")
+        ):
+            outputs = model(images)
+            
+            masks = masks.unsqueeze(1)
+            
+            loss = loss_fn(outputs, masks)
 
-        masks = masks.unsqueeze(1)
+        
 
-        loss = loss_fn(outputs, masks)
+        scaler.scale(loss).backward()
 
-        loss.backward()
+        scaler.step(optimizer)
 
-        optimizer.step()
+        scaler.update()
 
         running_loss += loss.item()
 
@@ -58,18 +68,30 @@ def validate_one_epoch(model, dataloader, loss_fn, device):
 
     running_loss = 0.0
 
+    progress_bar = tqdm(
+        dataloader,
+        desc="Validation",
+        unit="batch"
+    )
+
     with torch.no_grad():
 
-        for images, masks in dataloader:
+        for images, masks in progress_bar:
 
             images = images.to(device)
             masks = masks.to(device)
 
-            outputs = model(images)
+            with autocast(
+                device_type=device.type,
+                enabled=(device.type == "cuda")
+            ):
+                outputs = model(images)
+                
+                masks = masks.unsqueeze(1)
+                
+                loss = loss_fn(outputs, masks)
 
-            masks = masks.unsqueeze(1)
-
-            loss = loss_fn(outputs, masks)
+            
 
             running_loss += loss.item()
 
@@ -92,11 +114,13 @@ def main():
 
     # Loss Function
     print("Creating Loss Function...")
-    loss_fn = nn.BCEDiceLoss()
+    loss_fn = TverskyFocalLoss()
 
     # Optimizer
     print("Creating Optimizer...")
-    optimizer = Adam(model.parameters(), lr=0.001)
+    optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
+
+    scaler = GradScaler("cuda", enabled=(device.type == "cuda"))
 
     #Learning Rate scheduler
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -107,7 +131,7 @@ def main():
     )
 
     # Number of Epochs
-    epochs = 10
+    epochs = EPOCHS
 
     #best model tracking
     best_val_loss = float("inf")
@@ -135,7 +159,8 @@ def main():
             train_loader,
             loss_fn,
             optimizer,
-            device
+            device,
+            scaler
         )
 
         val_loss = validate_one_epoch(
@@ -179,7 +204,7 @@ def main():
 
         if counter >= patience:
 
-            print("\n   Earlt Stopping Triggered!")
+            print("\n   Early Stopping Triggered!")
             break  
 
     print("\n===================================")
