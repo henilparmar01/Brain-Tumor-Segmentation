@@ -31,14 +31,18 @@ def create_dataloader():
         train_dataset,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        num_workers=NUM_WORKERS
+        num_workers=NUM_WORKERS,
+        pin_memory=True,
+        persistent_workers=True
     )
 
     val_loader = DataLoader(
         val_dataset,
         batch_size=BATCH_SIZE,
         shuffle=False,
-        num_workers=NUM_WORKERS
+        num_workers=NUM_WORKERS,
+        pin_memory=True,
+        persistent_workers=True
 
     )
 
