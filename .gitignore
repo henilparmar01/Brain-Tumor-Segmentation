@@ -41,6 +41,8 @@ Brain Tumor Data/
 preprocessed_slices/
 *.npz
 
+preprocessed_slices.zip
+
 # Outputs
 outputs/
 predictions/
