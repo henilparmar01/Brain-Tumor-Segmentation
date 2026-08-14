@@ -10,12 +10,28 @@ from dataloader import create_dataloader
 from loss import TverskyFocalLoss
 from config import LEARNING_RATE, EPOCHS
 
+def dice_score(predictions, targets, smooth=1.0):
+    probabilities = torch.sigmoid(predictions)
+    predictions_binary = (probabilities > 0.5).float()
+
+    predictions_binary = predictions_binary.view(-1)
+    targets = targets.view(-1)
+
+    intersection = (predictions_binary * targets).sum()
+
+    dice = (2.0 * intersection + smooth) / (
+        predictions_binary.sum() + targets.sum() + smooth
+    )
+
+    return dice.item()
+
 
 def train_one_epoch(model, dataloader, loss_fn, optimizer, device, scaler):
 
     model.train()
 
     running_loss = 0.0
+    running_dice = 0.0
 
     progress_bar = tqdm(
         dataloader,
@@ -49,14 +65,18 @@ def train_one_epoch(model, dataloader, loss_fn, optimizer, device, scaler):
         scaler.update()
 
         running_loss += loss.item()
+        with torch.no_grad():
+            batch_dice = dice_score(outputs, masks)
+            running_dice += batch_dice
 
         progress_bar.set_postfix({
             "Loss": f"{loss.item():.4f}"
         })
 
     epoch_loss = running_loss / len(dataloader)
+    epoch_dice = running_dice / len(dataloader)
 
-    return epoch_loss
+    return epoch_loss, epoch_dice
 
 
    
@@ -67,6 +87,7 @@ def validate_one_epoch(model, dataloader, loss_fn, device):
     model.eval()
 
     running_loss = 0.0
+    running_dice = 0.0
 
     progress_bar = tqdm(
         dataloader,
@@ -94,10 +115,16 @@ def validate_one_epoch(model, dataloader, loss_fn, device):
             
 
             running_loss += loss.item()
+            with torch.no_grad():
+                batch_dice = dice_score(outputs, masks)
+                running_dice += batch_dice
+                            
+                        
 
     epoch_loss = running_loss / len(dataloader)
+    epoch_dice = running_dice / len(dataloader)
 
-    return epoch_loss
+    return epoch_loss, epoch_dice
 
 def main():
 
@@ -154,7 +181,7 @@ def main():
 
         print(f"\nEpoch [{epoch+1}/{epochs}]")
 
-        train_loss = train_one_epoch(
+        train_loss, train_dice = train_one_epoch(
             model,
             train_loader,
             loss_fn,
@@ -163,7 +190,7 @@ def main():
             scaler
         )
 
-        val_loss = validate_one_epoch(
+        val_loss, val_dice = validate_one_epoch(
             model,
             val_loader,
             loss_fn,
@@ -198,8 +225,8 @@ def main():
 
         print(
             f"Epoch [{epoch+1}/{epochs}] | "
-            f"Train Loss: {train_loss:.4f} | "
-            f"Val Loss: {val_loss:.4f}"
+            f"Train Loss: {train_loss:.4f} | Train Dice: {train_dice:.4f} | "
+            f"Val Loss: {val_loss:.4f} | Val Dice: {val_dice:.4f}"
          )
 
         if counter >= patience:
