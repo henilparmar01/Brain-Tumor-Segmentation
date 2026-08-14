@@ -43,6 +43,8 @@ preprocessed_slices/
 
 preprocessed_slices.zip
 
+predictions_comparison.png
+
 # Outputs
 outputs/
 predictions/

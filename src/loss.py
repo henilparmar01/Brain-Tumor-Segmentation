@@ -74,8 +74,8 @@ class TverskyFocalLoss(nn.Module):
         super().__init__()
 
         self.tversky = TverskyLoss(
-            alpha=0.3,
-            beta=0.7
+            alpha=0.2,
+            beta=0.8
         )
 
         self.focal = FocalLoss(

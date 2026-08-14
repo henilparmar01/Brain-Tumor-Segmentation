@@ -4,7 +4,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 #Dataset path
-DATASET_DIR = PROJECT_ROOT / "Brain Tumor Data"
+DATASET_DIR = PROJECT_ROOT / "300 Patient"
 
 
 # Training configuration

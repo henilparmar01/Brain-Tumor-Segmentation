@@ -10,7 +10,7 @@ from preprocess import preprocess_patient
 OUTPUT_DIR = Path("preprocessed_slices")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-EMPTY_SLICE_RATIO = 0.5
+EMPTY_SLICE_RATIO = 0.2
 
 
 def main():
