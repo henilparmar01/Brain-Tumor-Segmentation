@@ -53,3 +53,21 @@ results/
 # OS Files
 .DS_Store
 Thumbs.db
+
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+Brain Tumor Data/
+300 Patient/
+preprocessed_slices/
+
+*.pth
+*.pt
+
+src/api_outputs/
+api_outputs/
+
+actual_vs_predicted.png
+src/actual_vs_predicted.png
+predictions_comparison.png
